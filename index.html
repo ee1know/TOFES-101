@@ -596,6 +596,44 @@ input[type=checkbox], input[type=radio]{
 }
 </style>
 
+
+<style>
+/* GCS total: prevent overflow on mobile, enable wrapping and responsive font */
+#gcsTotal{
+  white-space: normal;
+  word-break: keep-all;
+  text-align: center;
+}
+@media (max-width: 520px){
+  #gcsTotal{ font-size: 13px; padding: 8px; }
+}
+/* Color classes already defined earlier; ensure visible borders */
+.gcs-total.severe{ background:#fee2e2; border-color:#dc2626; }
+.gcs-total.moderate{ background:#fef9c3; border-color:#eab308; }
+.gcs-total.mild{ background:#d1fae5; border-color:#16a34a; }
+</style>
+
+
+<style>
+/* Ensure HH:MM controls fit the column width on mobile */
+.timecol{ width:70px; }
+.timecol input.timex[type="time"]{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  height:32px;
+  padding:2px 4px;
+  direction:ltr;
+  text-align:center;
+  -webkit-appearance: none;
+  appearance: none;
+}
+/* Make all .mini-table fixed layout to prevent expansion */
+.mini-table{ table-layout: fixed; width:100%; }
+.mini-table th, .mini-table td{ padding:6px; vertical-align: middle; }
+</style>
+
 </head>
 <body>
 <div class="page">
@@ -701,21 +739,21 @@ input[type=checkbox], input[type=radio]{
 </tr>
 </thead>
 <tbody>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
 </tbody>
 </table>
 </section>
@@ -735,12 +773,12 @@ input[type=checkbox], input[type=radio]{
 </tr>
 </thead>
 <tbody id="vitalsBody">
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input inputmode="numeric" max="220" min="20" type="number"/></td><td><input inputmode="numeric" pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input inputmode="numeric" max="60" min="4" type="number"/></td><td><input inputmode="numeric" max="100" min="0" type="number"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input inputmode="numeric" max="220" min="20" type="number"/></td><td><input inputmode="numeric" pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input inputmode="numeric" max="60" min="4" type="number"/></td><td><input inputmode="numeric" max="100" min="0" type="number"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input inputmode="numeric" max="220" min="20" type="number"/></td><td><input inputmode="numeric" pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input inputmode="numeric" max="60" min="4" type="number"/></td><td><input inputmode="numeric" max="100" min="0" type="number"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input inputmode="numeric" max="220" min="20" type="number"/></td><td><input inputmode="numeric" pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input inputmode="numeric" max="60" min="4" type="number"/></td><td><input inputmode="numeric" max="100" min="0" type="number"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input inputmode="numeric" max="220" min="20" type="number"/></td><td><input inputmode="numeric" pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input inputmode="numeric" max="60" min="4" type="number"/></td><td><input inputmode="numeric" max="100" min="0" type="number"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input inputmode="numeric" max="220" min="20" type="number"/></td><td><input inputmode="numeric" pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input inputmode="numeric" max="60" min="4" type="number"/></td><td><input inputmode="numeric" max="100" min="0" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input max="220" min="20" type="number"/></td><td><input pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input max="60" min="4" type="number"/></td><td><input max="100" min="0" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input max="220" min="20" type="number"/></td><td><input pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input max="60" min="4" type="number"/></td><td><input max="100" min="0" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input max="220" min="20" type="number"/></td><td><input pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input max="60" min="4" type="number"/></td><td><input max="100" min="0" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input max="220" min="20" type="number"/></td><td><input pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input max="60" min="4" type="number"/></td><td><input max="100" min="0" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input max="220" min="20" type="number"/></td><td><input pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input max="60" min="4" type="number"/></td><td><input max="100" min="0" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input max="220" min="20" type="number"/></td><td><input pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input max="60" min="4" type="number"/></td><td><input max="100" min="0" type="number"/></td></tr>
 </tbody>
 </table>
 <div style="margin-top:6px;display:flex;gap:8px">
@@ -755,12 +793,12 @@ input[type=checkbox], input[type=radio]{
 <tr><th class="timecol">זמן</th><th>סוג</th><th style="width:120px">נפח (mL)</th><th style="width:120px">קצב (mL/h)</th></tr>
 </thead>
 <tbody>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
 </tbody>
 </table>
 </section>
@@ -771,14 +809,14 @@ input[type=checkbox], input[type=radio]{
 <tr><th class="timecol">זמן</th><th>תיאור</th></tr>
 </thead>
 <tbody>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
-<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" pattern="^\d{1,2}:\d{2}$"  type="time"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
 </tbody>
 </table>
 </section>
@@ -846,6 +884,10 @@ input[type=checkbox], input[type=radio]{
     var box = document.getElementById('gcsTotal');
     if (box){
       box.textContent = 'GCS: E' + e + ' + V' + v + ' + M' + m + ' = ' + total;
+      box.classList.remove('severe','moderate','mild');
+      if (total <= 8) box.classList.add('severe');
+      else if (total <= 12) box.classList.add('moderate');
+      else box.classList.add('mild');
     }
   }
   init();
@@ -887,11 +929,11 @@ input[type=checkbox], input[type=radio]{
 function addVitalsRow(){
   var tb = document.getElementById('vitalsBody'); if(!tb) return;
   var tr = document.createElement('tr');
-  tr.innerHTML = '<td class="timecol"><input type="text" class="timex" inputmode="numeric" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" maxlength="5"></td>'
-               + '<td><input type="number" min="20" max="220" inputmode="numeric"></td>'
-               + '<td><input type="text" placeholder="120/80" pattern="^\\d{2,3}/\\d{2,3}$" inputmode="numeric"></td>'
-               + '<td><input type="number" min="4" max="60" inputmode="numeric"></td>'
-               + '<td><input type="number" min="0" max="100" inputmode="numeric"></td>'
+  tr.innerHTML = '<td class="timecol"><input type="text" class="timex" pattern="^\d{1,2}:\d{2}$" ></td>'
+               + '<td><input type="number" min="20" max="220"></td>'
+               + '<td><input type="text" placeholder="120/80" pattern="^\\d{2,3}/\\d{2,3}$"></td>'
+               + '<td><input type="number" min="4" max="60"></td>'
+               + '<td><input type="number" min="0" max="100"></td>'
                ;
   tb.appendChild(tr);
 }
@@ -1105,8 +1147,7 @@ function currentHHMM(){
 
 // === Mask & validate HH:MM fields ===
 function bindTimeMasks(root){
-  (root || document).querySelectorAll('input.timex').forEach(function(inp){
-    if (inp._maskBound) return;
+  (root || document).querySelectorAll('input.timex').forEach(function(inp){ if (inp.type === 'time') return; if (inp._maskBound) return;
     inp._maskBound = true;
     inp.addEventListener('input', function(){
       var v = inp.value.replace(/[^\d]/g,'');
