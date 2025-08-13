@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+
+<html dir="rtl" lang="he">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>טופס 101</title>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>טופס טיפול שדה — קומפקט (v4.7)</title>
 <style>
   :root{--gap:8px; --b:#222}
   *{box-sizing:border-box}
@@ -53,7 +54,7 @@
 
 
   .int-list{display:grid;grid-template-columns:1fr;gap:6px}
-  .int-row{display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:center;border-bottom:1px solid #eee;padding-bottom:4px}
+  .int-row{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px;align-items:center;border-bottom:1px solid #eee;padding-bottom:4px}
   .int-row:last-child{border-bottom:0}
   .int-row input[type=time]{border:1px solid #bbb;padding:4px}
   .int-row label{font-size:14px}
@@ -77,173 +78,751 @@
   select{direction:rtl;text-align:right}
   .page{font-family: "Rubik", "Heebo", system-ui, -apple-system, Segoe UI, Arial, sans-serif}
 
+
+  /* Advanced medical data blocks */
+  .mini-table{width:100%;border-collapse:collapse;background:#fff}
+  .mini-table th, .mini-table td{border:1px solid #bbb;padding:6px;font-size:13px;text-align:right}
+  .mini-table th{background:#f3f4f6}
+  .flags{border:2px solid #bbb;padding:8px}
+  .flags.alert{border-color:#dc2626;background:#fee2e2}
+  .flags .row{margin-bottom:4px}
+  .export-box{border:1px dashed #999;padding:8px;background:#fafafa}
+  .export-box textarea{width:100%;min-height:120px;border:1px solid #bbb;padding:6px;resize:vertical;direction:ltr;text-align:left}
+  .btn{border:1px solid #111;background:#111;color:#fff;padding:8px 12px;cursor:pointer}
+  .btn.secondary{background:#fff;color:#111}
+  .hint{color:#6b7280;font-size:12px}
+  @media print{
+    .btn, .export-box, .hint{display:none !important}
+    .flags.alert{border-color:#000}
+    .mini-table{page-break-inside:avoid}
+  }
+
+
+  .gcs-total.severe{background:#fee2e2;border-color:#dc2626}
+  .gcs-total.moderate{background:#fef9c3;border-color:#eab308}
+  .gcs-total.mild{background:#d1fae5;border-color:#16a34a}
+
+
+  /* ---- Overflow & sizing fixes ---- */
+  html, body{overflow-x:hidden}
+  .page{overflow-x:hidden}
+  .card{overflow:hidden}
+  /* Allow grid/flex children to shrink inside containers */
+  .layout > *, .two > *, .int-list > *, .he-strip > *{min-width:0}
+  /* Labels can wrap to avoid pushing outside */
+  .row label{white-space:normal}
+  /* Inputs/selects never exceed cell width */
+  input, select, textarea{max-width:100%; box-sizing:border-box}
+  /* Table cells clip long content */
+  table td, table th{overflow:hidden;text-overflow:ellipsis}
+  /* In table cells make inputs full width */
+  table td input[type="text"],
+  table td input[type="number"],
+  table td input[type="time"],
+  table td input[type="datetime-local"]{width:100%}
+
+
+  .he-strip{grid-template-columns:repeat(3,minmax(0,1fr)) 2fr}
+  .he-transport{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-items:center}
+  .he-t{min-width:0}
+
+
+  .int-grid, .two, .layout, .three-up, .two-up{min-width:0}
+
+
+  /* Compact HH:MM time fields that never overflow */
+  .timecol{width:84px}
+  input.timex{width:100%;max-width:100%;min-width:0;text-align:center;letter-spacing:0.5px}
+  input.timex::placeholder{opacity:0.6}
+  /* In interventions list, fix the time column width as well */
+  .int-row{grid-template-columns:minmax(0,1fr) 96px !important}
+  .int-row input.timex{width:100%}
+
 </style>
+<style>
+/* --- Layout fixes for triage & transport --- */
+.he-strip{grid-template-columns:repeat(3,minmax(0,1fr));}
+.he-transport{grid-column:1 / -1; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; align-items:start; justify-items:start}
+/* Make each transport label stack checkbox and text vertically and allow wrapping */
+.he-t{display:flex; flex-direction:column; align-items:flex-start; gap:4px; white-space:normal; line-height:1.2}
+.he-t input{transform:scale(1.1)}
+/* Ensure triage color boxes can shrink without overflow */
+.he-col{min-width:0}
+.he-title{white-space:nowrap}
+</style><style>
+/* Make datetime-local inputs fill their cell width in timeline */
+#timelineTable input[type="datetime-local"] {
+    width: 100%;
+    box-sizing: border-box;
+}
+#timelineTable th, #timelineTable td {
+    vertical-align: middle;
+}
+</style><style>
+/* --- Timeline sizing & alignment (strong override) --- */
+#timelineTable { table-layout: fixed; }
+#timelineTable th { width: 200px; } /* header column stable width */
+#timelineTable td { width: auto; }
+#timelineTable th, #timelineTable td { vertical-align: middle; padding: 6px; }
+
+#timelineTable input[type="datetime-local"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  padding: 4px 6px;
+  border: 1px solid #bbb;
+  border-radius: 2px;
+  box-sizing: border-box;
+  direction: ltr;
+  text-align: left;
+}
+
+/* Prevent any inherited styles from shrinking inputs */
+#timelineTable td > * { min-width: 0; }
+</style><style>
+/* --- Fix overflow for datetime-local fields in timeline --- */
+#timelineTable { table-layout: fixed; width: 100%; }
+#timelineTable th { width: 200px; }
+#timelineTable td { width: auto; vertical-align: middle; padding: 6px; }
+
+#timelineTable input[type="datetime-local"] {
+  width: 180px;       /* fixed size */
+  max-width: 100%;    /* don't exceed cell */
+  height: 32px;
+  padding: 4px 6px;
+  border: 1px solid #bbb;
+  border-radius: 2px;
+  box-sizing: border-box;
+  direction: ltr;
+  text-align: left;
+  display: inline-block;
+}
+
+/* Center the input inside the cell if there's extra space */
+#timelineTable td { text-align: right; }
+</style><style>
+/* ===== Datetime field UI polish ===== */
+
+/* Header datetime inputs: center within field and use consistent width */
+.head .field input[type="datetime-local"]{
+  display:block;
+  width:180px;
+  max-width:100%;
+  height:32px;
+  margin:6px auto 0 auto; /* centered horizontally */
+  padding:4px 6px;
+  border:1px solid #bbb;
+  border-radius:2px;
+  box-sizing:border-box;
+  direction:ltr;
+  text-align:center;
+}
+
+/* Timeline table: stable grid and centered inputs */
+#timelineTable{ table-layout:fixed; width:100%; border-collapse:collapse; }
+#timelineTable th{ width:200px; }
+#timelineTable th, #timelineTable td{ vertical-align:middle; padding:6px; }
+
+#timelineTable td{ text-align:center; } /* center content in cells */
+
+#timelineTable input[type="datetime-local"]{
+  display:block;
+  width:180px;
+  max-width:100%;
+  height:32px;
+  margin:0 auto;         /* center horizontally */
+  padding:4px 6px;
+  border:1px solid #bbb;
+  border-radius:2px;
+  box-sizing:border-box;
+  direction:ltr;
+  text-align:center;
+  overflow:hidden;        /* safety */
+}
+
+/* Prevent any overflow quirks */
+#timelineTable td > *{ min-width:0; }
+</style><style>
+/* --- Pretty transport checkboxes as cards (RTL) --- */
+.he-transport{
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  align-items: stretch;
+}
+.he-t{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  background: #fafafa;
+  cursor: pointer;
+  min-height: 48px;
+  line-height: 1.2;
+  box-sizing: border-box;
+}
+.he-t .he-text{
+  display: inline-block;
+  white-space: normal;
+}
+.he-t input{
+  transform: scale(1.1);
+  flex: 0 0 auto;
+}
+/* Hover / focus / checked states */
+.he-t:hover{
+  background: #f3f4f6;
+  border-color: #999;
+}
+.he-t:has(input:focus-visible){
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+.he-t:has(input:checked){
+  background: #eef2ff;
+  border-color: #111;
+}
+/* Compact on print */
+@media print{
+  .he-transport{ gap:6px; grid-template-columns: repeat(4, 1fr); }
+  .he-t{ padding:6px 8px; border-radius:4px; }
+}
+</style><style>
+/* --- Transport cards: elevated, iconified, accessible --- */
+.he-transport{
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+.he-t{
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-auto-rows: min-content;
+  gap: 10px 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  transition: box-shadow .15s ease, border-color .15s ease, transform .05s ease;
+  cursor: pointer;
+}
+.he-t:hover{
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  border-color: #9ca3af;
+}
+.he-t:active{ transform: translateY(1px); }
+
+/* Hide the native checkbox but keep it accessible */
+.he-t .he-native{
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Icon and text */
+.he-t .he-icon{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #f3f4f6;
+}
+.he-t .he-icon svg{ display:block; }
+
+.he-t .he-text{
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: normal;
+}
+
+/* Checked visual */
+.he-t:has(.he-native:checked){
+  border-color: #111;
+  background: #eef2ff;
+  box-shadow: 0 6px 14px rgba(37,99,235,0.12);
+}
+.he-t:has(.he-native:checked) .he-icon{
+  background: #e0e7ff;
+}
+
+/* Focus ring when navigating by keyboard */
+.he-t:has(.he-native:focus-visible){
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Print-friendly tweaks */
+@media print{
+  .he-transport{ gap: 8px; grid-template-columns: repeat(4, 1fr); }
+  .he-t{ box-shadow: none; padding: 8px 10px; border-radius: 6px; }
+}
+</style><style>
+/* === Uniform width transport grid (responsive) === */
+.he-transport{
+  display:grid;
+  gap:12px;
+  align-items:stretch;
+  grid-template-columns: repeat(4, 1fr); /* 4 equal columns on wide screens */
+}
+@media (max-width: 900px){
+  .he-transport{ grid-template-columns: repeat(2, 1fr); } /* 2 equal columns on tablets */
+}
+@media (max-width: 520px){
+  .he-transport{ grid-template-columns: 1fr; } /* 1 column on phones */
+}
+
+/* Make cards fill cell height and look consistent */
+.he-t{
+  height:100%;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  align-items:center;
+  gap:10px 12px;
+  padding:12px 14px;
+  border:1px solid #d1d5db;
+  border-radius:10px;
+  background:#fff;
+  box-shadow:0 1px 2px rgba(0,0,0,0.06);
+}
+.he-t .he-text{ align-self:center; }
+.he-t .he-icon{ align-self:center; }
+</style><style>
+/* === FORCE OVERRIDES: Transport block === */
+.he-transport{
+  display:grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap:12px !important;
+  align-items:stretch !important;
+}
+@media (max-width: 900px){
+  .he-transport{ grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 520px){
+  .he-transport{ grid-template-columns: 1fr !important; }
+}
+.he-t{
+  position: relative !important;
+  display:grid !important;
+  grid-template-columns:auto 1fr !important;
+  align-items:center !important;
+  justify-items:center !important;
+  gap:10px 12px !important;
+  padding:12px 14px !important;
+  height:100% !important;
+  border:1px solid #d1d5db !important;
+  border-radius:10px !important;
+  background:#fff !important;
+  box-shadow:0 1px 2px rgba(0,0,0,0.06) !important;
+  text-align:center !important;
+  cursor:pointer !important;
+}
+.he-t .he-icon{ width:28px !important; height:28px !important; display:inline-flex !important; align-items:center !important; justify-content:center !important; border-radius:6px !important; background:#f3f4f6 !important; }
+.he-t .he-text{ font-weight:600 !important; line-height:1.25 !important; white-space:normal !important; }
+
+/* Full-card click; keep input accessible */
+.he-t .he-native{
+  position:absolute !important;
+  inset:0 !important;
+  opacity:0 !important;
+  cursor:pointer !important;
+}
+
+/* Selected visual */
+.he-t:has(.he-native:checked){
+  border-color:#111 !important;
+  background:#eef2ff !important;
+  box-shadow:0 6px 14px rgba(37,99,235,0.12) !important;
+}
+.he-t:has(.he-native:checked) .he-icon{ background:#e0e7ff !important; }
+.he-t:has(.he-native:focus-visible){ outline:3px solid #2563eb !important; outline-offset:2px !important; }
+</style><style>
+.vitals-inline{
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.vitals-inline > *{
+  flex:1 1 200px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.vitals-inline label{
+  white-space:nowrap;
+}
+</style>
+<style>
+/* === Unified input sizing === */
+input[type=text], input[type=number], input[type=time], input[type=datetime-local], select, textarea{
+  height: 36px;
+  line-height: 34px;
+  font-size: 14px;
+}
+textarea{ min-height: 120px; line-height: 1.4; }
+
+/* Larger touch targets for radios/checkboxes */
+input[type=checkbox], input[type=radio]{
+  transform: scale(1.15);
+}
+
+/* Button unification */
+.btn{ border:1px solid #111; background:#111; color:#fff; padding:12px 14px; font-weight:600; }
+.btn.secondary{ background:#fff; color:#111; }
+.btn.block{ display:block; width:100%; font-size:18px; padding:16px 18px; }
+
+/* Mobile-friendly tables: allow horizontal scroll inside card with tables */
+@media (max-width: 640px){
+  .card:has(.mini-table){ overflow-x:auto; }
+  .mini-table{ font-size:12px; }
+  .timecol{ width:76px; }
+}
+
+/* Vital highlight classes */
+.v-ok   input{ background:#d1fae5; }   /* green */
+.v-warn input{ background:#fef9c3; }   /* yellow */
+.v-crit input{ background:#fee2e2; }   /* red */
+
+/* Make colored backgrounds subtle on print */
+@media print{
+  .v-ok input, .v-warn input, .v-crit input{ background:#fff !important; }
+}
+
+/* Ensure table inputs fill and align consistently */
+.mini-table td input{ width:100%; box-sizing:border-box; text-align:center; }
+</style>
+
+
+<style>
+#vitalsTable{ table-layout: fixed; }
+#vitalsTable td input{ width:100%; box-sizing:border-box; }
+@media (max-width: 520px){
+  #vitalsTable{ font-size:12px; }
+}
+</style>
+
+
+<style>
+/* Tight layout for vitals table */
+#vitalsTable{ table-layout: fixed; width:100%; }
+#vitalsTable th, #vitalsTable td{ padding:4px; }
+#vitalsTable td input, #vitalsTable th input{
+  width:100%; box-sizing:border-box; text-align:center;
+  font-variant-numeric: tabular-nums;
+}
+/* On small screens, keep it inside the card and allow gentle scroll if needed */
+@media (max-width: 520px){
+  .card:has(#vitalsTable){ overflow-x:auto; }
+  #vitalsTable{ min-width: 390px; } /* sum of columns + borders */
+}
+</style>
+
+
+<style>
+/* Authoritative transport styles (override duplicates) */
+.he-transport{
+  display:grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap:12px !important;
+  align-items:stretch !important;
+}
+@media (max-width: 900px){
+  .he-transport{ grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 520px){
+  .he-transport{ grid-template-columns: 1fr !important; }
+}
+.he-t{
+  position: relative !important;
+  display:grid !important;
+  grid-template-columns:auto 1fr !important;
+  align-items:center !important;
+  gap:10px 12px !important;
+  padding:12px 14px !important;
+  height:100% !important;
+  border:1px solid #d1d5db !important;
+  border-radius:10px !important;
+  background:#fff !important;
+  box-shadow:0 1px 2px rgba(0,0,0,0.06) !important;
+}
+</style>
+
+
+<style>
+.topbar{
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #fff;
+  padding: 8px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+}
+.topbar .btn{ padding: 10px 14px; font-weight: 600; }
+@media print{
+  .topbar{ display:none !important; }
+}
+</style>
+
+
+<style>
+.bottombar{
+  position: sticky;
+  bottom: 0;
+  z-index: 1000;
+  background: #fff;
+  padding: 8px 10px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+}
+.bottombar .btn{ padding: 10px 14px; font-weight: 600; }
+@media print{
+  .bottombar{ display:none !important; }
+}
+</style>
+
 </head>
 <body>
 <div class="page">
-  
 
-  <!-- CLEAN HEADER -->
-  <div class="head">
-    <div class="field"><label>שם מלא</label><input type="text" id="fio"></div>
-    <div class="field"><label>מספר מזהה (ID)</label><input type="text" id="caseId"></div>
-    <div class="field"><label>זמן הפציעה</label><input type="datetime-local" id="injuryTime"></div>
-    <div class="field"><label>זמן תחילת טיפול</label><input type="datetime-local" id="startTime"></div>
-    <div class="field" style="grid-column:1 / span 2"><label>יחידה / הערה</label><input type="text" id="unitNote"></div>
-  </div>
+<!-- CLEAN HEADER -->
+<div class="head">
+<div class="field"><label>שם מלא</label><input id="fio" type="text"/></div>
+<div class="field"><label>מספר מזהה (ID)</label><input id="caseId" type="text"/></div>
+<div class="field"><label>זמן הפציעה</label><input id="injuryTime" type="datetime-local"/></div>
+<div class="field"><label>זמן תחילת טיפול</label><input id="startTime" type="datetime-local"/></div>
+<div class="field" style="grid-column:1 / span 2"><label>יחידה / הערה</label><input id="unitNote" type="text"/></div>
 
-  <div class="layout">
-    <!-- LEFT -->
-    <section class="card">
-      <h3>SABCD / AVPU — סקר ראשוני</h3>
-      <div class="row">
-        <strong class="muted">AVPU:</strong>
-        <label><input type="radio" name="avpu" value="A"> A</label>
-        <label><input type="radio" name="avpu" value="V"> V</label>
-        <label><input type="radio" name="avpu" value="P"> P</label>
-        <label><input type="radio" name="avpu" value="U"> U</label>
-      </div>
-
-      <div class="row"><strong>נתיב אוויר:</strong>
-        <label><input type="radio" name="airway" value="clear" checked> פתוח</label>
-        <label><input type="radio" name="airway" value="problem"> בעיה</label>
-      </div>
-
-      <div class="row"><strong>נשימה:</strong>
-        <label><input type="radio" name="breathProb" value="no" checked> תקין</label>
-        <label><input type="radio" name="breathProb" value="yes"> בעיה</label></div>
-      <div class="row"><label>RR <input type="number" id="rr" style="width:70px"></label> <label>SpO₂ <input type="number" id="spo2" style="width:80px" min="0" max="100"></label></div>
-      <div class="row"><strong>מחזור דם:</strong>
-        <label>דופק <input type="number" id="pulse" style="width:70px"></label>
-        <label>לחץ דם <input type="text" id="bp" placeholder="мм рт.ст." style="width:110px"></label>
-        <label><input type="checkbox"> דימום</label>
-        <label><input type="checkbox"> עירוי</label>
-      </div>
-
-      <div class="row"><strong>מצב נוירולוגי:</strong>
-        <label>אישונים <input type="text" style="width:100px"></label>
-        <label><input type="checkbox"> פרכוסים</label>
-      </div>
-
-      <div class="row"><strong>חשיפה:</strong>
-        <label><input type="checkbox"> היפותרמיה</label>
-        <label><input type="checkbox"> כוויות</label>
-      </div>
-
-      <h3 style="margin-top:10px">GCS</h3>
-      <div class="gcs">
-        <div class="box">
-          <label>E (פתיחת עיניים)</label>
-          <select id="gcsE" onchange="calcGCS()">
-            <option value="4">4 ספונטני</option>
-            <option value="3">3 לקול</option>
-            <option value="2">2 לכאב</option>
-            <option value="1">1 אין</option>
-          </select>
-        </div>
-        <div class="box">
-          <label>V (תגובה מילולית)</label>
-          <select id="gcsV" onchange="calcGCS()">
-            <option value="5">5 מתמצא</option>
-            <option value="4">4 מבולבל</option>
-            <option value="3">3 מילים לא מתאימות</option>
-            <option value="2">2 קולות</option>
-            <option value="1">1 אין</option>
-          </select>
-        </div>
-        <div class="box">
-          <label>M (תגובה מוטורית)</label>
-          <select id="gcsM" onchange="calcGCS()">
-            <option value="6">6 מציית לפקודות</option>
-            <option value="5">5 лתקיןализует</option>
-            <option value="4">4 נסיגה לכאב</option>
-            <option value="3">3 דקומטיקציה</option>
-            <option value="2">2 דצרברציה</option>
-            <option value="1">1 אין</option>
-          </select>
-        </div>
-      </div>
-      <div class="gcs-total" id="gcsTotal">GCS: 15</div>
-
-      
-      
-      <h3 style="margin-top:10px">התערבויות</h3>
-      <div class="int-list">
-        <div class="int-row"><label><input type="checkbox"> אינטובציה</label><input type="time"></div>
-        <div class="int-row"><label><input type="checkbox"> קוניוטומיה</label><input type="time"></div>
-        <div class="int-row"><label><input type="checkbox"> חמצן</label><input type="time"></div>
-        <div class="int-row"><label><input type="checkbox"> הנשמה (אמבו)</label><input type="time"></div>
-        <div class="int-row"><label><input type="checkbox"> נקז חזה</label><input type="time"></div>
-        <div class="int-row"><label><input type="checkbox"> חבישה / עצירת דימום</label><input type="time"></div>
-        <div class="int-row"><label><input type="checkbox"> נוזלים IV</label><input type="time"></div>
-        <div class="int-row"><label><input type="checkbox"> אנלגזיה</label><input type="time"></div>
-      </div>
-</section>
-  <section class="card" style="margin-top:10px">
-    <h3>שינויים / פעולות</h3>
-    <table style="width:100%;border-collapse:collapse">
-      <thead>
-        <tr>
-          <th style="width:70px;border:1px solid #bbb;padding:6px;background:#f3f4f6;text-align:left">זמן</th>
-          <th style="border:1px solid #bbb;padding:6px;background:#f3f4f6;text-align:left">מידע</th>
-        </tr>
-      </thead>
-      <tbody>
-<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
-<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
-<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
-<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
-<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
-<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
-<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
-<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
-<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
-<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
-<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
-<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
-<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
-<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
-<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  </div>
-  <section class="card" style="margin-top:10px">
-    <div class="he-strip">
-      <div class="he-col green">
-        <div class="he-title">ירוק</div>
-        <label class="he-box"><input type="checkbox"> </label>
-      </div>
-      <div class="he-col yellow">
-        <div class="he-title">צהוב</div>
-        <label class="he-box"><input type="checkbox"> </label>
-      </div>
-      <div class="he-col red">
-        <div class="he-title">אדום</div>
-        <label class="he-box"><input type="checkbox"> </label>
-      </div>
-      <div class="he-transport">
-        <label class="he-t"><input type="checkbox"> ביצוע במקום</label>
-        <label class="he-t"><input type="checkbox"> ים</label>
-        <label class="he-t"><input type="checkbox"> מוסק</label>
-        <label class="he-t"><input type="checkbox"> רכב</label>
-      </div>
-    </div>
-  </section>
-
-
-  <section class="card" style="margin-top:10px">
-    <h3>נתוני מטפל</h3>
-    <div class="row">
-      <label>שם פרטי <input type="text" style="width:220px"></label>
-      <label>שם משפחה <input type="text" style="width:240px"></label>
-      <label>מספר <input type="text" style="width:180px"></label>
-    </div>
-  </section>
+<div class="field"><label>זמן פינוי</label><input id="evacTime" type="datetime-local"/></div>
+<div class="field"><label>זמן הגעה לבית חולים</label><input id="hospArrive" type="datetime-local"/></div>
 
 </div>
-
+<div class="layout">
+<!-- LEFT -->
+<section class="card">
+<h3>SABCD / AVPU — סקר ראשוני</h3>
+<div class="row">
+<strong class="muted">AVPU:</strong>
+<label><input name="avpu" type="radio" value="A"/> A</label>
+<label><input name="avpu" type="radio" value="V"/> V</label>
+<label><input name="avpu" type="radio" value="P"/> P</label>
+<label><input name="avpu" type="radio" value="U"/> U</label>
+</div>
+<div class="row"><strong>נתיב אוויר:</strong>
+<label><input checked="" name="airway" type="radio" value="clear"/> פתוח</label>
+<label><input name="airway" type="radio" value="problem"/> בעיה</label>
+</div>
+<div class="row"><strong>נשימה:</strong>
+<label><input checked="" name="breathProb" type="radio" value="no"/> תקין</label>
+<label><input name="breathProb" type="radio" value="yes"/> בעיה</label></div>
+<div class="row"><label>RR <input id="rr" style="width:70px" type="number"/></label> <label>SpO₂ <input id="spo2" max="100" min="0" style="width:80px" type="number"/></label></div>
+<div class="row"><strong>מחזור דם:</strong>
+<label>דופק <input id="pulse" style="width:80px" type="number"/></label>
+<label>לחץ דם <input id="bp" placeholder="120/80" style="width:120px" type="text"/></label>
+<label><input type="checkbox"/> דימום</label>
+<label><input type="checkbox"/> עירוי</label>
+</div>
+<div class="row"><strong>מצב נוירולוגי:</strong>
+<label>אישונים <input placeholder="תגובה/גודל" style="width:100px" type="text"/></label>
+<label><input type="checkbox"/> פרכוסים</label>
+</div>
+<div class="row"><strong>חשיפה:</strong>
+<label><input type="checkbox"/> היפותרמיה</label>
+<label><input type="checkbox"/> כוויות</label>
+</div>
+<h3 style="margin-top:10px">GCS</h3>
+<div class="gcs">
+<div class="box">
+<label>E (פתיחת עיניים)</label>
+<select id="gcsE" onchange="calcGCS()">
+<option value="4">4 ספונטני</option>
+<option value="3">3 לקול</option>
+<option value="2">2 לכאב</option>
+<option value="1">1 אין</option>
+</select>
+</div>
+<div class="box">
+<label>V (תגובה מילולית)</label>
+<select id="gcsV" onchange="calcGCS()">
+<option value="5">5 מתמצא</option>
+<option value="4">4 מבולבל</option>
+<option value="3">3 מילים לא מתאימות</option>
+<option value="2">2 קולות</option>
+<option value="1">1 אין</option>
+</select>
+</div>
+<div class="box">
+<label>M (תגובה מוטורית)</label>
+<select id="gcsM" onchange="calcGCS()">
+<option value="6">6 מציית לפקודות</option>
+<option value="5">5 מכוון לכאב</option>
+<option value="4">4 נסיגה מכאב</option>
+<option value="3">3 כפיפה לא מתואמת (דקורטיקציה)</option>
+<option value="2">2 יישור לא מתואם (דצֶרֶבּרציה)</option>
+<option value="1">1 אין תגובה</option>
+</select>
+</div>
+</div>
+<div class="gcs-total" id="gcsTotal">GCS: 15</div>
+<h3 style="margin-top:10px">התערבויות</h3>
+<div class="int-list">
+<div class="int-row"><label><input type="checkbox"/> אינטובציה</label><input type="time"/></div>
+<div class="int-row"><label><input type="checkbox"/> קוניוטומיה</label><input type="time"/></div>
+<div class="int-row"><label><input type="checkbox"/> חמצן</label><input type="time"/></div>
+<div class="int-row"><label><input type="checkbox"/> הנשמה (אמבו)</label><input type="time"/></div>
+<div class="int-row"><label><input type="checkbox"/> נקז חזה</label><input type="time"/></div>
+<div class="int-row"><label><input type="checkbox"/> חבישה / עצירת דימום</label><input type="time"/></div>
+<div class="int-row"><label><input type="checkbox"/> נוזלים IV</label><input type="time"/></div>
+<div class="int-row"><label><input type="checkbox"/> אנלגזיה</label><input type="time"/></div>
+</div>
+</section>
+<section class="card" style="margin-top:10px">
+<h3>שינויים / פעולות</h3>
+<table style="width:100%;border-collapse:collapse">
+<thead>
+<tr>
+<th style="width:70px;border:1px solid #bbb;padding:6px;background:#f3f4f6;text-align:left">זמן</th>
+<th style="border:1px solid #bbb;padding:6px;background:#f3f4f6;text-align:left">מידע</th>
+</tr>
+</thead>
+<tbody>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')" style="width:100%" type="text"/></td></tr>
+</tbody>
+</table>
+</section>
+</div>
+<section class="card" style="margin-top:10px">
+<h3>סימנים חיוניים — מעקב</h3>
+<table class="mini-table" id="vitalsTable">
+<colgroup>
+<col style="width:70px"><col style="width:80px"><col style="width:110px"><col style="width:64px"><col style="width:64px"></colgroup>
+<thead>
+<tr>
+  <th class="timecol">זמן</th>
+  <th>דופק (HR)</th>
+  <th>לחץ דם (BP)</th>
+  <th>RR</th>
+  <th>SpO₂</th>
+</tr>
+</thead>
+<tbody id="vitalsBody">
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input inputmode="numeric" max="220" min="20" type="number"/></td><td><input inputmode="numeric" pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input inputmode="numeric" max="60" min="4" type="number"/></td><td><input inputmode="numeric" max="100" min="0" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input inputmode="numeric" max="220" min="20" type="number"/></td><td><input inputmode="numeric" pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input inputmode="numeric" max="60" min="4" type="number"/></td><td><input inputmode="numeric" max="100" min="0" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input inputmode="numeric" max="220" min="20" type="number"/></td><td><input inputmode="numeric" pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input inputmode="numeric" max="60" min="4" type="number"/></td><td><input inputmode="numeric" max="100" min="0" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input inputmode="numeric" max="220" min="20" type="number"/></td><td><input inputmode="numeric" pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input inputmode="numeric" max="60" min="4" type="number"/></td><td><input inputmode="numeric" max="100" min="0" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input inputmode="numeric" max="220" min="20" type="number"/></td><td><input inputmode="numeric" pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input inputmode="numeric" max="60" min="4" type="number"/></td><td><input inputmode="numeric" max="100" min="0" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input inputmode="numeric" max="220" min="20" type="number"/></td><td><input inputmode="numeric" pattern="^\d{2,3}/\d{2,3}$" placeholder="120/80" type="text"/></td><td><input inputmode="numeric" max="60" min="4" type="number"/></td><td><input inputmode="numeric" max="100" min="0" type="number"/></td></tr>
+</tbody>
+</table>
+<div style="margin-top:6px;display:flex;gap:8px">
+<button class="btn secondary" onclick="addVitalsRow()" type="button">+ שורה</button><button class="btn secondary" onclick="copyVitalsRow()" type="button">+ העתק שורה קודמת</button>
+<span class="hint">הזן מדידות חוזרות לאורך זמן לקבלת תמונת מצב.</span>
+</div>
+</section>
+<section class="card" style="margin-top:10px">
+<h3>עירויים / נוזלים</h3>
+<table class="mini-table" id="infusionsTable">
+<thead>
+<tr><th class="timecol">זמן</th><th>סוג</th><th style="width:120px">נפח (mL)</th><th style="width:120px">קצב (mL/h)</th></tr>
+</thead>
+<tbody>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="NS / LR / דם / פלזמה" type="text"/></td><td><input min="0" step="10" type="number"/></td><td><input min="0" step="10" type="number"/></td></tr>
+</tbody>
+</table>
+</section>
+<section class="card" style="margin-top:10px">
+<h3>פרוצדורות</h3>
+<table class="mini-table" id="procSimple">
+<thead>
+<tr><th class="timecol">זמן</th><th>תיאור</th></tr>
+</thead>
+<tbody>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
+<tr><td class="timecol"><input class="timex" inputmode="numeric" maxlength="5" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" type="text"/></td><td><input placeholder="תיאור קצר (למשל: פתיחת נתיב אוויר, דקומפרסיה)" type="text"/></td></tr>
+</tbody>
+</table>
+</section>
+<section class="card" style="margin-top:10px">
+<h3>נתוני מטפל</h3>
+<div class="row">
+<label>שם פרטי <input style="width:220px" type="text"/></label>
+<label>שם משפחה <input style="width:240px" type="text"/></label>
+<label>מספר <input placeholder="טלפון / מס’ אישי" style="width:180px" type="text"/></label>
+</div>
+</section>
+<section class="card" style="margin-top:10px">
+<div class="he-strip">
+<div class="he-col green">
+<div class="he-title">ירוק (קל)</div>
+<label class="he-box"><input type="radio" name="triageLevel" value="green"/></label>
+</div>
+<div class="he-col yellow">
+<div class="he-title">צהוב (בינוני)</div>
+<label class="he-box"><input type="radio" name="triageLevel" value="yellow"/></label>
+</div>
+<div class="he-col red">
+<div class="he-title">אדום (קשה)</div>
+<label class="he-box"><input type="radio" name="triageLevel" value="red"/></label>
+</div>
+<div class="he-transport">
+<label class="he-t"><input class="he-native" name="transportMode" type="radio"/><span class="he-icon"><svg aria-hidden="true" height="20" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M9 2h6a2 2 0 0 1 2 2h1a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1a2 2 0 0 1 2-2Zm0 2v2h6V4H9Zm8.3 6.3-5.65 5.65a1 1 0 0 1-1.41 0L7.7 14.41a1 1 0 1 1 1.41-1.41l1.42 1.41 4.95-4.95a1 1 0 0 1 1.41 1.41Z"></path></svg></span><span class="he-text">ביצוע במקום</span></label>
+<label class="he-t"><input class="he-native" name="transportMode" type="radio"/><span class="he-icon"><svg aria-hidden="true" height="20" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M3 18c1.5 0 1.5 1 3 1s1.5-1 3-1 1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 3-1v2c-1.5 0-1.5 1-3 1s-1.5-1-3-1-1.5 1-3 1-1.5-1-3-1-1.5 1-3 1-1.5-1-3-1v-2Zm8-13h6l2 7h-5v2h-6v-2H3l2-7h6Zm0 2H6.8L5.6 10h4.4V7Zm2 0v3h3.8l-.8-3H13Z"></path></svg></span><span class="he-text">פינוי ימי</span></label>
+<label class="he-t"><input class="he-native" name="transportMode" type="radio"/><span class="he-icon"><svg aria-hidden="true" height="20" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18a1 1 0 1 1 0 2h-7v3h3a5 5 0 0 1 5 5v2h-2v-2a3 3 0 0 0-3-3h-3v3H9v-3H4a2 2 0 1 1 0-4h8V8H3a1 1 0 1 1 0-2Zm6 12h6v2H9v-2Z"></path></svg></span><span class="he-text">פינוי מוסק</span></label>
+<label class="he-t"><input class="he-native" name="transportMode" type="radio"/><span class="he-icon"><svg aria-hidden="true" height="20" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11h1a2 2 0 0 1 2 2v4h-2v-1H4v1H2v-4a2 2 0 0 1 2-2h1Zm2.3-4 .9-2h7.6l.9 2H7.3ZM7 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm10 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"></path></svg></span><span class="he-text">פינוי יבשתי</span></label>
+</div>
+</div>
+</section><section class="card" style="margin-top:10px">
+<h3>ציר זמן</h3>
+<table class="mini-table" id="timelineTable">
+<tbody>
+<tr><th>זמן תחילת טיפול</th><td><input id="tl_start" type="datetime-local"/></td></tr>
+<tr><th>זמן הפציעה</th><td><input id="tl_injury" type="datetime-local"/></td></tr>
+<tr><th>זמן פינוי</th><td><input id="tl_evac" type="datetime-local"/></td></tr>
+<tr><th>זמן הגעה לבית חולים</th><td><input id="tl_hosp" type="datetime-local"/></td></tr>
+</tbody>
+</table>
+<div class="hint">השדות מסונכרנים עם שדות הזמן הראשיים אם קיימים.</div>
+</section></div>
 <script>
   function nowLocal(){const d=new Date();const tz=d.getTimezoneOffset();return new Date(d - tz*60000).toISOString().slice(0,16);}
   function init(){
@@ -271,7 +850,6 @@
   }
   init();
 </script>
-
 <script>
   (function(){
     function bindGCS(){
@@ -294,14 +872,6 @@
   })();
 </script>
 
-
-  <div style="margin:20px 0 0 0; padding:0;">
-    <button onclick="printNow()" style="width:100%;padding:16px;font-size:18px;border:none;background:#111;color:#fff;cursor:pointer">
-      שמירה כ‑PDF
-    </button>
-  </div>
-
-
 <script>
   function printNow(){
     try {
@@ -313,6 +883,466 @@
     }
   }
 </script>
+<script>
+function addVitalsRow(){
+  var tb = document.getElementById('vitalsBody'); if(!tb) return;
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td class="timecol"><input type="text" class="timex" inputmode="numeric" pattern="^\d{1,2}:\d{2}$" placeholder="HH:MM" maxlength="5"></td>'
+               + '<td><input type="number" min="20" max="220" inputmode="numeric"></td>'
+               + '<td><input type="text" placeholder="120/80" pattern="^\\d{2,3}/\\d{2,3}$" inputmode="numeric"></td>'
+               + '<td><input type="number" min="4" max="60" inputmode="numeric"></td>'
+               + '<td><input type="number" min="0" max="100" inputmode="numeric"></td>'
+               ;
+  tb.appendChild(tr);
+}
+function exportJSON(){
+  var data = {};
+  // Header basics if present
+  ['fio','caseId','injuryTime','startTime','unitNote','nowTime','tl_injury','tl_start','tl_evac','tl_hosp'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) data[id] = el.value || '';
+  });
+  // SABCD subset if present
+  try{
+    data.avpu = (document.querySelector('input[name="avpu"]:checked')||{}).value||'';
+    data.airway = (document.querySelector('input[name="airway"]:checked')||{}).value||'';
+    data.breathProb = (document.querySelector('input[name="breathProb"]:checked')||{}).value||'';
+    data.rr = (document.getElementById('rr')||{}).value||'';
+    data.spo2 = (document.getElementById('spo2')||{}).value||'';
+    data.pulse = (document.getElementById('pulse')||{}).value||'';
+    data.bp = (document.getElementById('bp')||{}).value||'';
+  }catch(e){}
+  // GCS
+  data.gcs = document.getElementById('gcsTotal') ? document.getElementById('gcsTotal').textContent : '';
+  // Interventions checklist with per-item time
+  var ints = [];
+  document.querySelectorAll('.int-list .int-row').forEach(function(r){
+    var name = (r.querySelector('label')||{}).innerText||'';
+    var on = (r.querySelector('input[type="checkbox"]')||{}).checked||false;
+    var t = (r.querySelector('input[type="time"]')||{}).value||'';
+    ints.push({name:name.trim(), done:on, time:t});
+  });
+  data.interventions = ints;
+  // Vitals table
+  var vitals = [];
+  var vb = document.getElementById('vitalsBody');
+  if (vb){
+    vb.querySelectorAll('tr').forEach(function(tr){
+      var tds = tr.querySelectorAll('td');
+      if (tds.length>=6){
+        vitals.push({
+          time: tds[0].querySelector('input')?.value||'',
+          hr: tds[1].querySelector('input')?.value||'',
+          bp: tds[2].querySelector('input')?.value||'',
+          rr: tds[3].querySelector('input')?.value||'',
+          spo2: tds[4].querySelector('input')?.value||'',
+          temp: tds[5].querySelector('input')?.value||''
+        });
+      }
+    });
+  }
+  data.vitals = vitals;
+  // Infusions
+  var infl = [];
+  var it = document.getElementById('infusionsTable');
+  if (it){
+    it.querySelectorAll('tbody tr').forEach(function(tr){
+      var tds = tr.querySelectorAll('td');
+      if (tds.length>=4){
+        infl.push({
+          time: tds[0].querySelector('input')?.value||'',
+          type: tds[1].querySelector('input')?.value||'',
+          volume: tds[2].querySelector('input')?.value||'',
+          rate: tds[3].querySelector('input')?.value||''
+        });
+      }
+    });
+  }
+  data.infusions = infl;
+  // Procedures
+  var procs = [];
+  var ps = document.getElementById('procSimple');
+  if (ps){
+    ps.querySelectorAll('tbody tr').forEach(function(tr){
+      var tds = tr.querySelectorAll('td');
+      if (tds.length>=2){
+        procs.push({
+          time: tds[0].querySelector('input')?.value||'',
+          text: tds[1].querySelector('input')?.value||''
+        });
+      }
+    });
+  }
+  // Red flags
+  var rfs = [];
+  document.querySelectorAll('#flagsBox input.rf').forEach(function(cb){
+    rfs.push({text: cb.parentElement.innerText.trim(), value: cb.checked});
+  });
+  data.red_flags = rfs;
+  // Triage
+  var tri = document.querySelector('.he-col input[type="radio"]:checked');
+  data.triage = (document.querySelector('input[name="triageLevel"]:checked')||{}).value || '';
 
+  var out = document.getElementById('jsonOut');
+  if (out){ out.value = JSON.stringify(data, null, 2); }
+}
+
+// QR via Google Chart (requires internet)
+function openQR(){
+  var out = document.getElementById('jsonOut');
+  if (!out || !out.value){ exportJSON(); }
+  var txt = document.getElementById('jsonOut').value || '';
+  if (!txt){ alert('נא ליצור JSON קודם'); return; }
+  var url = 'https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=' + encodeURIComponent(txt);
+  window.open(url, '_blank');
+}
+</script>
+<script>
+(function(){
+  var KEY = 'form101_autosave_v1';
+
+  function collect(){
+    var data = {};
+    var nodes = document.querySelectorAll('input, select, textarea');
+    nodes.forEach(function(el){
+      var id = el.id || el.name;
+      if(!id) return;
+      if (el.type === 'radio'){
+        if (el.checked) data[id] = el.value;
+      } else if (el.type === 'checkbox'){
+        data[id] = el.checked;
+      } else {
+        data[id] = el.value;
+      }
+    });
+    return data;
+  }
+
+  function apply(data){
+    if(!data) return;
+    var nodes = document.querySelectorAll('input, select, textarea');
+    nodes.forEach(function(el){
+      var id = el.id || el.name;
+      if(!id) return;
+      if (!(id in data)) return;
+      if (el.type === 'radio'){
+        // for radios: match by name group and value
+        if (el.value === data[id]) el.checked = true;
+      } else if (el.type === 'checkbox'){
+        el.checked = !!data[id];
+      } else {
+        el.value = data[id];
+      }
+    });
+    // Recompute GCS if needed
+    if (typeof calcGCS === 'function') calcGCS();
+  }
+
+  function save(){ 
+    try{ localStorage.setItem(KEY, JSON.stringify(collect())); }catch(e){}
+  }
+
+  // Debounce to avoid spamming storage
+  var t;
+  function scheduleSave(){ clearTimeout(t); t = setTimeout(save, 200); }
+
+  function bind(){
+    document.querySelectorAll('input, select, textarea').forEach(function(el){
+      ['input','change'].forEach(function(ev){
+        el.addEventListener(ev, scheduleSave, {passive:true});
+      });
+    });
+  }
+
+  // Two-way sync for timeline <-> header fields
+  function syncBind(aId, bId){
+    var a = document.getElementById(aId);
+    var b = document.getElementById(bId);
+    if(!a || !b) return;
+    a.addEventListener('change', function(){ if(b.value!==a.value){ b.value = a.value; scheduleSave(); }}, {passive:true});
+    b.addEventListener('change', function(){ if(a.value!==b.value){ a.value = b.value; scheduleSave(); }}, {passive:true});
+  }
+
+  function init(){
+    try{
+      var stored = localStorage.getItem(KEY);
+      if (stored){
+        apply(JSON.parse(stored));
+      }
+    }catch(e){}
+    bind();
+    // link tl_* with main fields if present
+    syncBind('tl_injury','injuryTime');
+    syncBind('tl_start','startTime');
+    syncBind('tl_evac','evacTime'); // if exists
+    syncBind('tl_hosp','hospArrive'); // if exists
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
+  // expose clear
+  window.clearForm = function(){
+    if(!confirm('לאפס את הטופס?')) return;
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    document.querySelectorAll('input, select, textarea').forEach(function(el){
+      if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+      else el.value = '';
+    });
+    if (typeof calcGCS === 'function') calcGCS();
+  }
+})();
+</script>
+
+<script>
+// === Utility: current HH:MM ===
+function currentHHMM(){
+  var d = new Date();
+  var hh = String(d.getHours()).padStart(2,'0');
+  var mm = String(d.getMinutes()).padStart(2,'0');
+  return hh + ':' + mm;
+}
+
+// === Mask & validate HH:MM fields ===
+function bindTimeMasks(root){
+  (root || document).querySelectorAll('input.timex').forEach(function(inp){
+    if (inp._maskBound) return;
+    inp._maskBound = true;
+    inp.addEventListener('input', function(){
+      var v = inp.value.replace(/[^\d]/g,'');
+      if (v.length >= 3){
+        var hh = v.slice(0,2);
+        var mm = v.slice(2,4);
+        var h = Math.min(23, parseInt(hh||'0',10));
+        var m = Math.min(59, parseInt(mm||'0',10));
+        inp.value = String(isNaN(h)?'':h).padStart(2,'0') + ':' + String(isNaN(m)?'':m).padStart(2,'0');
+      } else {
+        inp.value = v;
+      }
+    }, {passive:true});
+    inp.addEventListener('blur', function(){
+      var m = /^(\d{1,2}):(\d{2})$/.exec(inp.value);
+      if (!m){ inp.value = ''; return; }
+      var h = Math.min(23, parseInt(m[1],10));
+      var mm = Math.min(59, parseInt(m[2],10));
+      inp.value = String(h).padStart(2,'0') + ':' + String(mm).padStart(2,'0');
+    }, {passive:true});
+  });
+}
+
+// === Vitals highlighting ===
+function classifyCell(td, cls){
+  td.classList.remove('v-ok','v-warn','v-crit');
+  if (cls) td.classList.add(cls);
+}
+function highlightVitalsRow(tr){
+  var tds = tr.querySelectorAll('td');
+  if (tds.length < 5) return;
+
+  // HR
+  var hr = parseInt(tds[1].querySelector('input')?.value||'',10);
+  if (!isNaN(hr)){
+    classifyCell(tds[1], hr<50||hr>120 ? 'v-crit' : ( (hr<60||hr>100) ? 'v-warn' : 'v-ok'));
+  } else classifyCell(tds[1], null);
+
+  // BP
+  var bpv = (tds[2].querySelector('input')?.value||'').trim();
+  var m = /^(\d{2,3})\/(\d{2,3})$/.exec(bpv);
+  if (m){
+    var sys = parseInt(m[1],10), dia = parseInt(m[2],10);
+    var crit = (sys<90 || sys>180 || dia<50 || dia>110);
+    var warn = (!crit && (sys<100 || sys>160 || dia<60 || dia>100));
+    classifyCell(tds[2], crit ? 'v-crit' : (warn ? 'v-warn' : 'v-ok'));
+  } else classifyCell(tds[2], null);
+
+  // RR
+  var rr = parseInt(tds[3].querySelector('input')?.value||'',10);
+  if (!isNaN(rr)){
+    classifyCell(tds[3], rr<8 || rr>30 ? 'v-crit' : ( (rr<12 || rr>20) ? 'v-warn' : 'v-ok'));
+  } else classifyCell(tds[3], null);
+
+  // SpO2
+  var s = parseInt(tds[4].querySelector('input')?.value||'',10);
+  if (!isNaN(s)){
+    classifyCell(tds[4], s<90 ? 'v-crit' : (s<=92 ? 'v-warn' : 'v-ok'));
+  } else classifyCell(tds[4], null);
+
+  } else classifyCell(tds[5], null);
+}
+
+function bindVitalsHighlighting(root){
+  (root || document).querySelectorAll('#vitalsBody tr').forEach(function(tr){
+    if (tr._hlBound) return;
+    tr._hlBound = true;
+    tr.querySelectorAll('input').forEach(function(inp){
+      ['input','change','blur'].forEach(function(ev){
+        inp.addEventListener(ev, function(){ highlightVitalsRow(tr); }, {passive:true});
+      });
+    });
+    highlightVitalsRow(tr);
+  });
+}
+
+// === Override/add GCS color logic ===
+(function(){
+  var orig = window.calcGCS;
+  window.calcGCS = function(){
+    var eSel = document.getElementById('gcsE');
+    var vSel = document.getElementById('gcsV');
+    var mSel = document.getElementById('gcsM');
+    var e = parseInt(eSel && eSel.value ? eSel.value : 0, 10);
+    var v = parseInt(vSel && vSel.value ? vSel.value : 0, 10);
+    var m = parseInt(mSel && mSel.value ? mSel.value : 0, 10);
+    var total = e + v + m;
+    var box = document.getElementById('gcsTotal');
+    if (box){
+      box.textContent = 'GCS: E' + e + ' + V' + v + ' + M' + m + ' = ' + total;
+      box.classList.remove('severe','moderate','mild');
+      if (total <= 8) box.classList.add('severe');
+      else if (total <= 12) box.classList.add('moderate');
+      else box.classList.add('mild');
+    }
+    if (typeof orig === 'function' && orig !== window.calcGCS){
+      // no-op: we've replaced the behavior
+    }
+  }
+})();
+
+// === Patch addVitalsRow to auto-fill time and bind behaviors ===
+(function(){
+  var origAdd = window.addVitalsRow;
+  window.addVitalsRow = function(){
+    if (typeof origAdd === 'function') origAdd();
+    // After row appended, set current time and bind
+    var vb = document.getElementById('vitalsBody');
+    if (!vb) return;
+    var rows = vb.querySelectorAll('tr');
+    if (!rows.length) return;
+    var last = rows[rows.length-1];
+    var tInput = last.querySelector('td:first-child input');
+    if (tInput){
+      tInput.value = currentHHMM();
+    }
+    bindTimeMasks(last);
+    bindVitalsHighlighting(last);
+  }
+})();
+
+// === On load: bind masks & highlighting, and normalize existing rows ===
+(function(){
+  function initEnhancements(){
+    bindTimeMasks(document);
+    bindVitalsHighlighting(document);
+    if (typeof calcGCS === 'function') calcGCS();
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', initEnhancements);
+  } else {
+    initEnhancements();
+  }
+})();
+</script>
+
+<textarea id="jsonOut" style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;"></textarea>
+
+<script>
+function bindBPMasks(root){
+  (root || document).querySelectorAll('input#bp, #vitalsTable td:nth-child(3) input[type="text"]').forEach(function(inp){
+    if (inp._bpMaskBound) return;
+    inp._bpMaskBound = true;
+    inp.addEventListener('input', function(){
+      var v = inp.value.replace(/[^\d]/g,'');
+      if (!v) { inp.value=''; return; }
+      if (v.length <= 3){ inp.value = v; return; }
+      var left = v.slice(0,3);
+      var right = v.slice(3,5);
+      // Trim to max 3 / 3 digits
+      left = left.replace(/^0+(\d)/,'\\1').slice(0,3);
+      right = right.slice(0,3);
+      if (right.length) inp.value = left + '/' + right;
+      else inp.value = left;
+    }, {passive:true});
+    inp.addEventListener('blur', function(){
+      var m = /^(\d{2,3})\/(\d{2,3})$/.exec(inp.value);
+      if (!m){
+        // Try to coerce if only numbers typed
+        var v = inp.value.replace(/[^\d]/g,'');
+        if (v.length>=4){
+          var l = v.slice(0,3);
+          var r = v.slice(3,5);
+          inp.value = parseInt(l,10) + '/' + parseInt(r||'0',10);
+        } else {
+          // leave as is or clear
+        }
+      }
+    }, {passive:true});
+  });
+}
+</script>
+
+
+<script>
+function copyJSON(){
+  try{
+    exportJSON();
+    var ta = document.getElementById('jsonOut');
+    if (!ta) return;
+    ta.select();
+    ta.setSelectionRange(0, 999999);
+    document.execCommand('copy');
+    // also try modern API
+    if (navigator.clipboard) navigator.clipboard.writeText(ta.value).catch(function(){});
+  }catch(e){}
+}
+
+// Duplicate last vitals row (copy values except time)
+function copyVitalsRow(){
+  var tb = document.getElementById('vitalsBody'); if(!tb) return;
+  var rows = tb.querySelectorAll('tr'); if (!rows.length) return;
+  var last = rows[rows.length-1];
+  var clone = last.cloneNode(true);
+  // Clear time, keep values for other cells
+  var t = clone.querySelector('td:first-child input'); if (t) t.value = '';
+  tb.appendChild(clone);
+  if (typeof bindTimeMasks === 'function') bindTimeMasks(clone);
+  if (typeof bindVitalsHighlighting === 'function') bindVitalsHighlighting(clone);
+  if (typeof bindBPMasks === 'function') bindBPMasks(clone);
+}
+
+// Remove dead flagsBox logic if present by disabling handlers
+window.addEventListener('DOMContentLoaded', function(){
+  if (typeof bindBPMasks === 'function') bindBPMasks(document);
+  // Re-bind triage radios to ensure only one checked (native radios already enforce this)
+});
+
+// Fix syncBind pairs including evac/hospital
+(function(){
+  function syncBind(aId, bId){
+    var a = document.getElementById(aId);
+    var b = document.getElementById(bId);
+    if(!a || !b) return;
+    a.addEventListener('change', function(){ if(b.value!==a.value){ b.value = a.value; }}, {passive:true});
+    b.addEventListener('change', function(){ if(a.value!==b.value){ a.value = b.value; }}, {passive:true});
+  }
+  function initSync(){
+    syncBind('tl_injury','injuryTime');
+    syncBind('tl_start','startTime');
+    syncBind('tl_evac','evacTime');
+    syncBind('tl_hosp','hospArrive');
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initSync);
+  else initSync();
+})();
+</script>
+
+
+
+
+
+
+
+<div class="bottombar">
+  <button class="btn" type="button" onclick="printNow()">שמירה כ-PDF</button>
+</div>
 </body>
 </html>
