@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>טופס 101</title>
+<style>
+  :root{--gap:8px; --b:#222}
+  *{box-sizing:border-box}
+  body{margin:0;background:#f6f7f8;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#111}
+  .page{max-width:900px;margin:10px auto;padding:10px;background:#fff;border:1px solid #ddd}
+  .toolbar{display:flex;gap:8px;justify-content:flex-end;margin-bottom:8px}
+  button{border:1px solid #111;background:#111;color:#fff;padding:8px 12px;cursor:pointer}
+  button.secondary{background:#fff;color:#111}
+  h3{margin:0 0 6px 0;font-size:14px;border-bottom:1px solid #ddd;padding-bottom:4px}
+  .head{display:grid;grid-template-columns: 1fr 1fr;grid-template-rows:auto auto auto;gap:8px;margin-bottom:8px}
+  .field{background:#fff;border:1px solid #bbb;padding:6px}
+  .field label{display:block;font-size:11px;color:#555;margin-bottom:3px}
+  .field input[type=text]{width:100%;border:0;border-bottom:1px solid #bbb;padding:4px 2px}
+  .field input[type=datetime-local]{width:100%;border:0;border-bottom:1px solid #bbb;padding:4px 2px}
+  .layout{display:grid;grid-template-columns: 1fr; gap:10px}
+  .card{border:1px solid #bbb;background:#fff;padding:8px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:6px}
+  .row label{white-space:nowrap;font-size:13px}
+  .muted{color:#6b7280;font-size:12px}
+  select, input[type=number], input[type=time], input[type=text]{border:1px solid #bbb;padding:5px}
+  .gcs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .gcs .box label{display:block;font-size:11px;color:#555;margin-bottom:2px}
+  .gcs-total{font-weight:700;text-align:center;border:1px dashed #999;padding:6px;margin-top:6px}
+  .checkcol{display:grid;grid-template-columns:1fr;gap:6px}
+  textarea{width:100%;min-height:260px;border:1px solid #bbb;padding:6px;resize:vertical}
+  table{width:100%;border-collapse:collapse}
+  th,td{border:1px solid #bbb;padding:6px;font-size:13px}
+  th{background:#f3f4f6;text-align:left}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media print{ .toolbar{display:none}; @page { size: A4 portrait; margin: 10mm; } }
+
+  .int-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:10px}
+  .int-grid > *{min-width:0}
+  .int-details{min-width:220px}
+  .int-details textarea{width:100%;min-height:220px;border:1px solid #bbb;padding:6px;resize:vertical;display:block}
+
+
+  .int-grid{display:grid;grid-template-columns:1fr 0.9fr;gap:10px}
+  .int-grid > *{min-width:0}
+  .int-times{border:1px solid #bbb;padding:8px;background:#fafafa}
+  .int-times .smalltitle{font-size:12px;color:#555;margin-bottom:4px}
+  .times-list{display:grid;grid-auto-rows:min-content;gap:6px}
+  .time-row label{font-size:13px}
+  .time-row input[type=time]{padding:4px;border:1px solid #bbb}
+  .int-details-wide{margin-top:10px}
+  .int-details-wide textarea{width:100%;min-height:200px;border:1px solid #bbb;padding:6px;resize:vertical;display:block}
+
+
+  .int-list{display:grid;grid-template-columns:1fr;gap:6px}
+  .int-row{display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:center;border-bottom:1px solid #eee;padding-bottom:4px}
+  .int-row:last-child{border-bottom:0}
+  .int-row input[type=time]{border:1px solid #bbb;padding:4px}
+  .int-row label{font-size:14px}
+
+
+  .he-strip{display:grid;grid-template-columns:repeat(3,1fr) 2fr;gap:8px;align-items:center;direction:rtl}
+  .he-col{border:1px solid #555;display:grid;grid-template-rows:auto 1fr;align-items:center;justify-items:center;height:64px}
+  .he-title{font-weight:700;margin-top:4px}
+  .he-box{display:flex;align-items:end;justify-content:center;width:100%;height:100%;padding-bottom:6px}
+  .he-col.green{background:#d1fae5}
+  .he-col.yellow{background:#fef9c3}
+  .he-col.red{background:#fee2e2}
+  .he-transport{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:center;justify-items:start}
+  .he-t{display:flex;gap:6px;align-items:center}
+  .he-t input{transform:scale(1.1)}
+
+
+  body{direction:rtl;text-align:right}
+  .row label{direction:rtl;text-align:right}
+  input[type=time], input[type=number], input[type=datetime-local], input[type=text]{direction:ltr;text-align:left}
+  select{direction:rtl;text-align:right}
+  .page{font-family: "Rubik", "Heebo", system-ui, -apple-system, Segoe UI, Arial, sans-serif}
+
+</style>
+</head>
+<body>
+<div class="page">
+  
+
+  <!-- CLEAN HEADER -->
+  <div class="head">
+    <div class="field"><label>שם מלא</label><input type="text" id="fio"></div>
+    <div class="field"><label>מספר מזהה (ID)</label><input type="text" id="caseId"></div>
+    <div class="field"><label>זמן הפציעה</label><input type="datetime-local" id="injuryTime"></div>
+    <div class="field"><label>זמן תחילת טיפול</label><input type="datetime-local" id="startTime"></div>
+    <div class="field" style="grid-column:1 / span 2"><label>יחידה / הערה</label><input type="text" id="unitNote"></div>
+  </div>
+
+  <div class="layout">
+    <!-- LEFT -->
+    <section class="card">
+      <h3>SABCD / AVPU — סקר ראשוני</h3>
+      <div class="row">
+        <strong class="muted">AVPU:</strong>
+        <label><input type="radio" name="avpu" value="A"> A</label>
+        <label><input type="radio" name="avpu" value="V"> V</label>
+        <label><input type="radio" name="avpu" value="P"> P</label>
+        <label><input type="radio" name="avpu" value="U"> U</label>
+      </div>
+
+      <div class="row"><strong>נתיב אוויר:</strong>
+        <label><input type="radio" name="airway" value="clear" checked> פתוח</label>
+        <label><input type="radio" name="airway" value="problem"> בעיה</label>
+      </div>
+
+      <div class="row"><strong>נשימה:</strong>
+        <label><input type="radio" name="breathProb" value="no" checked> תקין</label>
+        <label><input type="radio" name="breathProb" value="yes"> בעיה</label></div>
+      <div class="row"><label>RR <input type="number" id="rr" style="width:70px"></label> <label>SpO₂ <input type="number" id="spo2" style="width:80px" min="0" max="100"></label></div>
+      <div class="row"><strong>מחזור דם:</strong>
+        <label>דופק <input type="number" id="pulse" style="width:70px"></label>
+        <label>לחץ דם <input type="text" id="bp" placeholder="мм рт.ст." style="width:110px"></label>
+        <label><input type="checkbox"> דימום</label>
+        <label><input type="checkbox"> עירוי</label>
+      </div>
+
+      <div class="row"><strong>מצב נוירולוגי:</strong>
+        <label>אישונים <input type="text" style="width:100px"></label>
+        <label><input type="checkbox"> פרכוסים</label>
+      </div>
+
+      <div class="row"><strong>חשיפה:</strong>
+        <label><input type="checkbox"> היפותרמיה</label>
+        <label><input type="checkbox"> כוויות</label>
+      </div>
+
+      <h3 style="margin-top:10px">GCS</h3>
+      <div class="gcs">
+        <div class="box">
+          <label>E (פתיחת עיניים)</label>
+          <select id="gcsE" onchange="calcGCS()">
+            <option value="4">4 ספונטני</option>
+            <option value="3">3 לקול</option>
+            <option value="2">2 לכאב</option>
+            <option value="1">1 אין</option>
+          </select>
+        </div>
+        <div class="box">
+          <label>V (תגובה מילולית)</label>
+          <select id="gcsV" onchange="calcGCS()">
+            <option value="5">5 מתמצא</option>
+            <option value="4">4 מבולבל</option>
+            <option value="3">3 מילים לא מתאימות</option>
+            <option value="2">2 קולות</option>
+            <option value="1">1 אין</option>
+          </select>
+        </div>
+        <div class="box">
+          <label>M (תגובה מוטורית)</label>
+          <select id="gcsM" onchange="calcGCS()">
+            <option value="6">6 מציית לפקודות</option>
+            <option value="5">5 лתקיןализует</option>
+            <option value="4">4 נסיגה לכאב</option>
+            <option value="3">3 דקומטיקציה</option>
+            <option value="2">2 דצרברציה</option>
+            <option value="1">1 אין</option>
+          </select>
+        </div>
+      </div>
+      <div class="gcs-total" id="gcsTotal">GCS: 15</div>
+
+      
+      
+      <h3 style="margin-top:10px">התערבויות</h3>
+      <div class="int-list">
+        <div class="int-row"><label><input type="checkbox"> אינטובציה</label><input type="time"></div>
+        <div class="int-row"><label><input type="checkbox"> קוניוטומיה</label><input type="time"></div>
+        <div class="int-row"><label><input type="checkbox"> חמצן</label><input type="time"></div>
+        <div class="int-row"><label><input type="checkbox"> הנשמה (אמבו)</label><input type="time"></div>
+        <div class="int-row"><label><input type="checkbox"> נקז חזה</label><input type="time"></div>
+        <div class="int-row"><label><input type="checkbox"> חבישה / עצירת דימום</label><input type="time"></div>
+        <div class="int-row"><label><input type="checkbox"> נוזלים IV</label><input type="time"></div>
+        <div class="int-row"><label><input type="checkbox"> אנלגזיה</label><input type="time"></div>
+      </div>
+</section>
+  <section class="card" style="margin-top:10px">
+    <h3>שינויים / פעולות</h3>
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr>
+          <th style="width:70px;border:1px solid #bbb;padding:6px;background:#f3f4f6;text-align:left">זמן</th>
+          <th style="border:1px solid #bbb;padding:6px;background:#f3f4f6;text-align:left">מידע</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
+<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
+<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
+<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
+<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
+<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
+<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
+<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
+<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
+<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
+<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
+<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
+<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
+<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
+<tr><td><input type="time"></td><td><input type="text" style="width:100%" placeholder="מידע (למשל: ירידה ב‑SpO₂ / חיבור פלזמה / קטאמין וכו')"></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  </div>
+  <section class="card" style="margin-top:10px">
+    <div class="he-strip">
+      <div class="he-col green">
+        <div class="he-title">ירוק</div>
+        <label class="he-box"><input type="checkbox"> </label>
+      </div>
+      <div class="he-col yellow">
+        <div class="he-title">צהוב</div>
+        <label class="he-box"><input type="checkbox"> </label>
+      </div>
+      <div class="he-col red">
+        <div class="he-title">אדום</div>
+        <label class="he-box"><input type="checkbox"> </label>
+      </div>
+      <div class="he-transport">
+        <label class="he-t"><input type="checkbox"> ביצוע במקום</label>
+        <label class="he-t"><input type="checkbox"> ים</label>
+        <label class="he-t"><input type="checkbox"> מוסק</label>
+        <label class="he-t"><input type="checkbox"> רכב</label>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="card" style="margin-top:10px">
+    <h3>נתוני מטפל</h3>
+    <div class="row">
+      <label>שם פרטי <input type="text" style="width:220px"></label>
+      <label>שם משפחה <input type="text" style="width:240px"></label>
+      <label>מספר <input type="text" style="width:180px"></label>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  function nowLocal(){const d=new Date();const tz=d.getTimezoneOffset();return new Date(d - tz*60000).toISOString().slice(0,16);}
+  function init(){
+    // Bind GCS listeners
+    var eSel = document.getElementById('gcsE');
+    var vSel = document.getElementById('gcsV');
+    var mSel = document.getElementById('gcsM');
+    [eSel, vSel, mSel].forEach(function(el){
+      if(el){ el.addEventListener('change', calcGCS); }
+    });
+ calcGCS(); }
+  function seed(fn,n){for(let i=0;i<n;i++) fn();}
+  function calcGCS(){
+    var eSel = document.getElementById('gcsE');
+    var vSel = document.getElementById('gcsV');
+    var mSel = document.getElementById('gcsM');
+    var e = parseInt(eSel && eSel.value ? eSel.value : 0, 10);
+    var v = parseInt(vSel && vSel.value ? vSel.value : 0, 10);
+    var m = parseInt(mSel && mSel.value ? mSel.value : 0, 10);
+    var total = e + v + m;
+    var box = document.getElementById('gcsTotal');
+    if (box){
+      box.textContent = 'GCS: E' + e + ' + V' + v + ' + M' + m + ' = ' + total;
+    }
+  }
+  init();
+</script>
+
+<script>
+  (function(){
+    function bindGCS(){
+      var eSel = document.getElementById('gcsE');
+      var vSel = document.getElementById('gcsV');
+      var mSel = document.getElementById('gcsM');
+      [eSel, vSel, mSel].forEach(function(el){
+        if(!el) return;
+        ['change','input'].forEach(function(ev){
+          el.addEventListener(ev, calcGCS, {passive:true});
+        });
+      });
+      calcGCS();
+    }
+    if (document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', bindGCS);
+    } else {
+      bindGCS();
+    }
+  })();
+</script>
+
+
+  <div style="margin:20px 0 0 0; padding:0;">
+    <button onclick="printNow()" style="width:100%;padding:16px;font-size:18px;border:none;background:#111;color:#fff;cursor:pointer">
+      שמירה כ‑PDF
+    </button>
+  </div>
+
+
+<script>
+  function printNow(){
+    try {
+      window.focus();
+      // Some mobile browsers need a brief delay
+      setTimeout(function(){ window.print(); }, 50);
+    } catch(e){
+      try { window.print(); } catch(_) {}
+    }
+  }
+</script>
+
+</body>
+</html>
